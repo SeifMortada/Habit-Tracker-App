@@ -5,18 +5,22 @@ import com.seifmortada.applications.habittracker.core.domain.models.Habit
 
 fun HabitEntity.toHabit(): Habit {
     return Habit(
+        id = id,
         title = title,
         details = details,
         createdAt = createdAt,
-        completedDates = completedDates
+        completedDates = completedDates,
+        isChecked = isChecked
     )
 }
 
 fun Habit.toHabitEntity(): HabitEntity {
     return HabitEntity(
+        id = id,
         title = title,
         details = details,
         createdAt = createdAt,
-        completedDates = completedDates
+        completedDates = completedDates,
+        isChecked = isChecked
     )
 }

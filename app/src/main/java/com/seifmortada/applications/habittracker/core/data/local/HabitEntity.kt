@@ -9,6 +9,7 @@ data class HabitEntity(
     val title: String,
     val details: String?,
     val createdAt: Long,
-    val completedDates: List<Long>
+    val completedDates: List<Long>,
+    val isChecked: Boolean
 )
 
