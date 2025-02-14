@@ -7,10 +7,12 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.seifmortada.applications.habittracker.core.domain.models.Habit
 import com.seifmortada.applications.habittracker.databinding.HabitItemBinding
-import com.seifmortada.applications.habittracker.habits_list.utils.TimeFormater
+import com.seifmortada.applications.habittracker.habits_list.utils.TimeUtils
 
 class HabitAdapter(
     private var habits: List<Habit>,
+    private val isFilteredAdapter: Boolean = false,
+    private val onHabitClicked: (habit: Habit) -> Unit,
     private val onHabitChecked: (Habit) -> Unit
 ) : RecyclerView.Adapter<HabitAdapter.HabitViewHolder>() {
 
@@ -20,22 +22,32 @@ class HabitAdapter(
         fun bind(habit: Habit) {
             binding.tvHabitTitle.text = habit.title
             binding.tvHabitDetails.text = habit.details ?: "No details"
-            binding.cbHabitChecked.isChecked = habit.isChecked
-            binding.completedDate.text = TimeFormater.formatDate(habit.createdAt)
+            binding.cbHabitChecked.isChecked = if (isFilteredAdapter) true else habit.isChecked
+            binding.cbHabitChecked.isEnabled = !isFilteredAdapter
+            binding.createdOnTxt.text = "Created on: " + TimeUtils.formatDate(habit.createdAt)
             val completedDatesLayout = binding.llCompletedDates
             completedDatesLayout.removeAllViews()
 
+
             habit.completedDates.forEach { timestamp ->
-                val formattedDate =   TimeFormater.formatDate(timestamp)
+                val formattedDate = TimeUtils.formatDate(timestamp)
                 val completedDateTextView = TextView(itemView.context).apply {
-                    text = "Completed on: $formattedDate"
+                    text = "Done on: " + formattedDate
                     textSize = 12f
-                    setTextColor(ContextCompat.getColor(itemView.context, android.R.color.darker_gray))
+                    setTextColor(
+                        ContextCompat.getColor(
+                            itemView.context,
+                            android.R.color.darker_gray
+                        )
+                    )
                 }
                 completedDatesLayout.addView(completedDateTextView)
             }
             binding.cbHabitChecked.setOnCheckedChangeListener { _, isChecked ->
                 onHabitChecked(habit.copy(isChecked = isChecked))
+            }
+            binding.editImg.setOnClickListener {
+                onHabitClicked(habit)
             }
         }
     }
