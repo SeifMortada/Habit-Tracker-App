@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.google.devtools.ksp)
+    alias(libs.plugins.dagger.hilt.plugin)
 }
 
 android {
@@ -33,6 +35,16 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    buildFeatures {
+        viewBinding = true
+    }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            merges+="META-INF/LICENSE.md"
+            merges+="META-INF/LICENSE-notice.md"
+        }
+    }
 }
 
 dependencies {
@@ -45,4 +57,25 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // Navigation
+    implementation(libs.navigation.fragment.ktx)
+    implementation(libs.navigation.ui.ktx)
+    //fragment
+    implementation(libs.androidx.fragment)
+    // view model
+    implementation(libs.androidx.lifecycle.livedata)
+    implementation(libs.androidx.lifecycle.viewmodel)
+    implementation(libs.androidx.lifecycle.runtime)
+    implementation(libs.androidx.lifecycle.activity)
+    //room
+    implementation(libs.room)
+    implementation(libs.room.runtime)
+    ksp(libs.room.compiler)
+
+    //dagger Hilt
+    implementation(libs.dagger.hilt)
+    ksp(libs.dagger.hilt.compiler)
+// Gson
+    implementation(libs.gson)
+
 }
