@@ -2,9 +2,12 @@ package com.seifmortada.applications.habittracker.habits_list.ui.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.seifmortada.applications.habittracker.core.domain.models.Habit
 import com.seifmortada.applications.habittracker.databinding.HabitItemBinding
+import com.seifmortada.applications.habittracker.habits_list.utils.TimeFormater
 
 class HabitAdapter(
     private var habits: List<Habit>,
@@ -18,7 +21,19 @@ class HabitAdapter(
             binding.tvHabitTitle.text = habit.title
             binding.tvHabitDetails.text = habit.details ?: "No details"
             binding.cbHabitChecked.isChecked = habit.isChecked
+            binding.completedDate.text = TimeFormater.formatDate(habit.createdAt)
+            val completedDatesLayout = binding.llCompletedDates
+            completedDatesLayout.removeAllViews()
 
+            habit.completedDates.forEach { timestamp ->
+                val formattedDate =   TimeFormater.formatDate(timestamp)
+                val completedDateTextView = TextView(itemView.context).apply {
+                    text = "Completed on: $formattedDate"
+                    textSize = 12f
+                    setTextColor(ContextCompat.getColor(itemView.context, android.R.color.darker_gray))
+                }
+                completedDatesLayout.addView(completedDateTextView)
+            }
             binding.cbHabitChecked.setOnCheckedChangeListener { _, isChecked ->
                 onHabitChecked(habit.copy(isChecked = isChecked))
             }

@@ -33,31 +33,83 @@ class HabitsListViewModel @Inject constructor(private val habitRepository: Habit
     init {
         insertFakeHabits()
     }
+
     fun completeHabit(habit: Habit) {
-        val updatedHabit = habit.copy(
-            isChecked = !habit.isChecked,
-            completedDates = if (!habit.isChecked) {
-                habit.completedDates + System.currentTimeMillis()
-            } else {
-                habit.completedDates.dropLast(1)
-            }
-        )
         viewModelScope.launch {
-            habitRepository.upsertHabit(habit)
+            val updatedHabit = habit.copy(
+                isChecked = !habit.isChecked,
+                completedDates = if (!habit.isChecked) {
+                    habit.completedDates + System.currentTimeMillis()
+                } else {
+                    habit.completedDates.dropLast(1)
+                }
+            )
+            habitRepository.upsertHabit(updatedHabit)
         }
     }
-    fun insertFakeHabits() {
+
+    private fun insertFakeHabits() {
         viewModelScope.launch {
             val fakeHabits = listOf(
-                Habit(id=1,"Read a Book", "Read 20 pages", System.currentTimeMillis(), emptyList(),true),
-                Habit(id=2,"Exercise", "Do 30 minutes of workout", System.currentTimeMillis(), emptyList(),true),
-                Habit(id=3,"Meditation", "Meditate for 10 minutes", System.currentTimeMillis(), emptyList(),true),
-                Habit(id=4,"Drink Water", "Drink 8 glasses of water", System.currentTimeMillis(), emptyList(),false),
-                Habit(id=5,"id=1,Journal Writing", "Write one page about your day", System.currentTimeMillis(), emptyList(),false)
+                Habit(
+                    id = 1,
+                    title = "Read a Book",
+                    details = "Read 20 pages",
+                    createdAt = System.currentTimeMillis(),
+                    completedDates = listOf(
+                        System.currentTimeMillis() - 1000000000L, // Example date 1
+                        System.currentTimeMillis() - 2000000000L  // Example date 2
+                    ),
+                    isChecked = true
+                ),
+                Habit(
+                    id = 2,
+                    title = "Exercise",
+                    details = "Do 30 minutes of workout",
+                    createdAt = System.currentTimeMillis(),
+                    completedDates = listOf(
+                        System.currentTimeMillis() - 3000000000L, // Example date 1
+                        System.currentTimeMillis() - 4000000000L  // Example date 2
+                    ),
+                    isChecked = true
+                ),
+                Habit(
+                    id = 3,
+                    title = "Meditation",
+                    details = "Meditate for 10 minutes",
+                    createdAt = System.currentTimeMillis(),
+                    completedDates = listOf(
+                        System.currentTimeMillis() - 5000000000L, // Example date 1
+                        System.currentTimeMillis() - 6000000000L  // Example date 2
+                    ),
+                    isChecked = true
+                ),
+                Habit(
+                    id = 4,
+                    title = "Drink Water",
+                    details = "Drink 8 glasses of water",
+                    createdAt = System.currentTimeMillis(),
+                    completedDates = listOf(
+                        System.currentTimeMillis() - 7000000000L  // Example date 1
+                    ),
+                    isChecked = false
+                ),
+                Habit(
+                    id = 5,
+                    title = "Journal Writing",
+                    details = "Write one page about your day",
+                    createdAt = System.currentTimeMillis(),
+                    completedDates = listOf(
+                        System.currentTimeMillis() - 8000000000L  // Example date 1
+                    ),
+                    isChecked = false
+                )
             )
+
             fakeHabits.forEach {
                 habitRepository.upsertHabit(it)
             }
+
         }
     }
 

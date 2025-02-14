@@ -6,14 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.seifmortada.applications.habittracker.core.ui.extensions.collectFlow
 import com.seifmortada.applications.habittracker.databinding.FragmentHabitsListBinding
 import com.seifmortada.applications.habittracker.habits_list.ui.adapters.HabitAdapter
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class HabitsListFragment : Fragment() {
@@ -41,22 +38,14 @@ class HabitsListFragment : Fragment() {
     }
 
     private fun collectCheckedHabits() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(state = Lifecycle.State.STARTED) {
-                viewModel.checkedHabits.collect { habits ->
-                    checkedHabitsAdapter.updateData(habits)
-                }
-            }
+        collectFlow(viewModel.checkedHabits) { habits ->
+            checkedHabitsAdapter.updateData(habits)
         }
     }
 
     private fun collectUnCheckedHabits() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(state = Lifecycle.State.STARTED) {
-                viewModel.uncheckedHabits.collect { habits ->
-                    uncheckedHabitsAdapter.updateData(habits)
-                }
-            }
+        collectFlow(viewModel.uncheckedHabits) { habits ->
+            uncheckedHabitsAdapter.updateData(habits)
         }
     }
 
