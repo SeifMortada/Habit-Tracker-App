@@ -32,7 +32,7 @@ class HabitAdapter(
             habit.completedDates.forEach { timestamp ->
                 val formattedDate = TimeUtils.formatDate(timestamp)
                 val completedDateTextView = TextView(itemView.context).apply {
-                    text = "✅: " + formattedDate
+                    text = "✅ " + formattedDate
                     textSize = 12f
                     setTextColor(
                         ContextCompat.getColor(
@@ -44,7 +44,7 @@ class HabitAdapter(
                 completedDatesLayout.addView(completedDateTextView)
             }
             binding.cbHabitChecked.setOnCheckedChangeListener { _, isChecked ->
-                onHabitChecked(habit.copy(isChecked = isChecked))
+                onHabitChecked(habit)
             }
 
             binding.editImg.setOnClickListener {

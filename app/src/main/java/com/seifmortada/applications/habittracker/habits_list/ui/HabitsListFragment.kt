@@ -1,23 +1,21 @@
 package com.seifmortada.applications.habittracker.habits_list.ui
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
+import com.seifmortada.applications.habittracker.R
 import com.seifmortada.applications.habittracker.core.base.BaseFragment
 import com.seifmortada.applications.habittracker.core.domain.models.Habit
 import com.seifmortada.applications.habittracker.core.ui.extensions.collectFlow
 import com.seifmortada.applications.habittracker.databinding.FragmentHabitsListBinding
 import com.seifmortada.applications.habittracker.habits_list.ui.adapters.HabitAdapter
-import com.seifmortada.applications.habittracker.habits_list.ui.components.EditHabitDialogFragment
 import com.seifmortada.applications.habittracker.habits_list.utils.TimeUtils
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -44,19 +42,21 @@ class HabitsListFragment : BaseFragment<FragmentHabitsListBinding, HabitsListVie
 
     private fun handleFilteredHabits(filteredHabits: List<Habit>) {
         toggleHabitVisibility(filteredHabits.isNotEmpty())
-        if (filteredHabits.isEmpty() && isFiltered) {
-            showToastMessage("No habits found for the selected date")
-        } else {
-            filteredHabitsAdapter.updateData(filteredHabits)
-            isFiltered = false
-        }
+        filteredHabitsAdapter.updateData(filteredHabits)
+        isFiltered = false
     }
 
+
     private fun observeState() {
-        collectFlow(viewModel.checkedHabits) { checkedHabitsAdapter.updateData(it) }
-        collectFlow(viewModel.uncheckedHabits) { uncheckedHabitsAdapter.updateData(it) }
+        collectFlow(viewModel.checkedHabits) { checkedHabits ->
+            checkedHabitsAdapter.updateData(checkedHabits)
+        }
+        collectFlow(viewModel.uncheckedHabits) { uncheckedHabits ->
+            uncheckedHabitsAdapter.updateData(uncheckedHabits)
+        }
         collectFlow(viewModel.filteredHabits) { handleFilteredHabits(it) }
     }
+
 
     private fun createHabitAdapter(isFilteredAdapter: Boolean = false) =
         HabitAdapter(
@@ -68,7 +68,9 @@ class HabitsListFragment : BaseFragment<FragmentHabitsListBinding, HabitsListVie
             onDeleteClicked = {
                 handleHabitDeletion(it)
             },
-            onHabitChecked = { habit -> viewModel.completeHabit(habit) }
+            onHabitChecked = { habit ->
+                viewModel.toggleHabitCompletion(habit)
+            }
         )
 
     private fun handleHabitDeletion(deletedHabit: Habit) {
@@ -82,7 +84,7 @@ class HabitsListFragment : BaseFragment<FragmentHabitsListBinding, HabitsListVie
     private fun navigateToHabitDetails(habit: Habit) {
         val action =
             HabitsListFragmentDirections.actionHabitsListFragmentToHabitDetailFragment(
-                habit.id
+                habit.id!!
             )
         findNavController().navigate(action)
     }
@@ -104,6 +106,9 @@ class HabitsListFragment : BaseFragment<FragmentHabitsListBinding, HabitsListVie
 
         binding.datePickerText.setOnClickListener {
             showDatePicker()
+        }
+        binding.addBtn.setOnClickListener {
+            findNavController().navigate(R.id.action_habitsListFragment_to_addHabitFragment)
         }
     }
 

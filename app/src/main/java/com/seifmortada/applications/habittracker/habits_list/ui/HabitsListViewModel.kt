@@ -25,6 +25,7 @@ class HabitsListViewModel @Inject constructor(private val habitRepository: Habit
                 started = WhileUiSubscribed,
                 initialValue = emptyList()
             )
+
     val todayTimestamp = System.currentTimeMillis()
 
     val uncheckedHabits: StateFlow<List<Habit>> =
@@ -32,7 +33,7 @@ class HabitsListViewModel @Inject constructor(private val habitRepository: Habit
             habits.filter { habit ->
                 !habit.isChecked && TimeUtils.isSameDay(habit.createdAt, todayTimestamp)
             }
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        }.stateIn(viewModelScope, WhileUiSubscribed, emptyList())
 
     val checkedHabits: StateFlow<List<Habit>> =
         habits.map { habits ->
@@ -41,7 +42,7 @@ class HabitsListViewModel @Inject constructor(private val habitRepository: Habit
                     TimeUtils.isSameDay(completedDate, todayTimestamp)
                 }
             }
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        }.stateIn(viewModelScope, WhileUiSubscribed, emptyList())
 
     private val _selectedDate = MutableStateFlow<Long?>(null)
     val filteredHabits = _selectedDate
@@ -54,11 +55,8 @@ class HabitsListViewModel @Inject constructor(private val habitRepository: Habit
             filteredList
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    init {
-        insertFakeHabits()
-    }
 
-    fun completeHabit(habit: Habit) = viewModelScope.launch {
+    fun toggleHabitCompletion(habit: Habit) = viewModelScope.launch {
         habitRepository.upsertHabit(
             habit.copy(
                 isChecked = !habit.isChecked,
@@ -69,72 +67,6 @@ class HabitsListViewModel @Inject constructor(private val habitRepository: Habit
                 }
             )
         )
-    }
-
-
-    private fun insertFakeHabits() {
-        viewModelScope.launch {
-            val fakeHabits = listOf(
-                Habit(
-                    id = 1,
-                    title = "Read a Book",
-                    details = "Read 20 pages",
-                    createdAt = System.currentTimeMillis(),
-                    completedDates = listOf(
-                        System.currentTimeMillis() - 1000000000L, // Example date 1
-                        System.currentTimeMillis() - 2000000000L  // Example date 2
-                    ),
-                    isChecked = true
-                ),
-                Habit(
-                    id = 2,
-                    title = "Exercise",
-                    details = "Do 30 minutes of workout",
-                    createdAt = System.currentTimeMillis(),
-                    completedDates = listOf(
-                        System.currentTimeMillis() - 3000000000L, // Example date 1
-                        System.currentTimeMillis() - 4000000000L  // Example date 2
-                    ),
-                    isChecked = true
-                ),
-                Habit(
-                    id = 3,
-                    title = "Meditation",
-                    details = "Meditate for 10 minutes",
-                    createdAt = System.currentTimeMillis(),
-                    completedDates = listOf(
-                        System.currentTimeMillis() - 5000000000L, // Example date 1
-                        System.currentTimeMillis() - 6000000000L  // Example date 2
-                    ),
-                    isChecked = true
-                ),
-                Habit(
-                    id = 4,
-                    title = "Drink Water",
-                    details = "Drink 8 glasses of water",
-                    createdAt = System.currentTimeMillis(),
-                    completedDates = listOf(
-                        System.currentTimeMillis() - 7000000000L  // Example date 1
-                    ),
-                    isChecked = false
-                ),
-                Habit(
-                    id = 5,
-                    title = "Journal Writing",
-                    details = "Write one page about your day",
-                    createdAt = System.currentTimeMillis(),
-                    completedDates = listOf(
-                        System.currentTimeMillis() - 8000000000L  // Example date 1
-                    ),
-                    isChecked = false
-                )
-            )
-
-            fakeHabits.forEach {
-                habitRepository.upsertHabit(it)
-            }
-
-        }
     }
 
     fun getHabitsByDate(date: Long) {

@@ -1,7 +1,7 @@
 package com.seifmortada.applications.habittracker.core.domain.models
 
 data class Habit(
-    val id: Int,
+    val id: Int?,
     val title: String,
     val details: String?,
     val createdAt: Long,
