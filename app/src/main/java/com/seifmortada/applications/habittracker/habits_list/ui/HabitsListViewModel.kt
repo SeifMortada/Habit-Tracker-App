@@ -147,6 +147,11 @@ class HabitsListViewModel @Inject constructor(private val habitRepository: Habit
         }
     }
 
+    fun deleteHabit(habit: Habit) {
+        viewModelScope.launch {
+            habitRepository.deleteHabit(habit)
+        }
+    }
 
     companion object {
         private const val StopTimeoutMillis: Long = 5000

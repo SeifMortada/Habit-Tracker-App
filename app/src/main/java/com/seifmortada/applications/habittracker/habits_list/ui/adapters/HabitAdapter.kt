@@ -12,7 +12,8 @@ import com.seifmortada.applications.habittracker.habits_list.utils.TimeUtils
 class HabitAdapter(
     private var habits: List<Habit>,
     private val isFilteredAdapter: Boolean = false,
-    private val onHabitClicked: (habit: Habit) -> Unit,
+    private val onEditClicked: (habit: Habit) -> Unit,
+    private val onDeleteClicked: (habit: Habit) -> Unit,
     private val onHabitChecked: (Habit) -> Unit
 ) : RecyclerView.Adapter<HabitAdapter.HabitViewHolder>() {
 
@@ -24,15 +25,14 @@ class HabitAdapter(
             binding.tvHabitDetails.text = habit.details ?: "No details"
             binding.cbHabitChecked.isChecked = if (isFilteredAdapter) true else habit.isChecked
             binding.cbHabitChecked.isEnabled = !isFilteredAdapter
-            binding.createdOnTxt.text = "Created on: " + TimeUtils.formatDate(habit.createdAt)
-            val completedDatesLayout = binding.llCompletedDates
+            val completedDatesLayout = binding.allCompletedDates
             completedDatesLayout.removeAllViews()
 
 
             habit.completedDates.forEach { timestamp ->
                 val formattedDate = TimeUtils.formatDate(timestamp)
                 val completedDateTextView = TextView(itemView.context).apply {
-                    text = "Done on: " + formattedDate
+                    text = "✅: " + formattedDate
                     textSize = 12f
                     setTextColor(
                         ContextCompat.getColor(
@@ -46,8 +46,12 @@ class HabitAdapter(
             binding.cbHabitChecked.setOnCheckedChangeListener { _, isChecked ->
                 onHabitChecked(habit.copy(isChecked = isChecked))
             }
+
             binding.editImg.setOnClickListener {
-                onHabitClicked(habit)
+                onEditClicked(habit)
+            }
+            binding.deleteImg.setOnClickListener {
+                onDeleteClicked(habit)
             }
         }
     }
