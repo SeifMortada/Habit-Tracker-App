@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_habitsListFragment_to_habitDetailFragment"
             app:destination="@id/habitDetailFragment" />
+        <action
+            android:id="@+id/action_habitsListFragment_to_addHabitFragment"
+            app:destination="@id/addHabitFragment" />
     </fragment>
     <fragment
         android:id="@+id/habitDetailFragment"
@@ -23,4 +26,9 @@
             android:name="habitId"
             app:argType="integer" />
     </fragment>
+    <fragment
+        android:id="@+id/addHabitFragment"
+        android:name="com.seifmortada.applications.habittracker.add_habit.ui.AddHabitFragment"
+        android:label="AddHabitFragment"
+        tools:layout="@layout/fragment_add_habit" />
 </navigation>
