@@ -9,5 +9,18 @@
         android:id="@+id/habitsListFragment"
         android:name="com.seifmortada.applications.habittracker.habits_list.ui.HabitsListFragment"
         android:label="fragment_habits_list"
-        tools:layout="@layout/fragment_habits_list" />
+        tools:layout="@layout/fragment_habits_list">
+        <action
+            android:id="@+id/action_habitsListFragment_to_habitDetailFragment"
+            app:destination="@id/habitDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/habitDetailFragment"
+        android:name="com.seifmortada.applications.habittracker.habit_detail.ui.HabitDetailFragment"
+        android:label="HabitDetailFragment"
+        tools:layout="@layout/fragment_habit_detail">
+        <argument
+            android:name="habitId"
+            app:argType="integer" />
+    </fragment>
 </navigation>

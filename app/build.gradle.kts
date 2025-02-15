@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.dagger.hilt.plugin)
+    id("androidx.navigation.safeargs")
+    id ("kotlin-parcelize")
 }
 
 android {

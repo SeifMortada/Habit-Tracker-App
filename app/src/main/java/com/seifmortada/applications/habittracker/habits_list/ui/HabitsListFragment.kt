@@ -7,9 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.snackbar.Snackbar
+import com.seifmortada.applications.habittracker.core.base.BaseFragment
 import com.seifmortada.applications.habittracker.core.domain.models.Habit
 import com.seifmortada.applications.habittracker.core.ui.extensions.collectFlow
 import com.seifmortada.applications.habittracker.databinding.FragmentHabitsListBinding
@@ -19,20 +22,18 @@ import com.seifmortada.applications.habittracker.habits_list.utils.TimeUtils
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class HabitsListFragment : Fragment() {
-    private var _binding: FragmentHabitsListBinding? = null
-    private val binding get() = _binding!!
-    private val viewModel: HabitsListViewModel by viewModels()
+class HabitsListFragment : BaseFragment<FragmentHabitsListBinding, HabitsListViewModel>() {
+    override val viewModel: HabitsListViewModel by viewModels()
     private lateinit var uncheckedHabitsAdapter: HabitAdapter
     private lateinit var checkedHabitsAdapter: HabitAdapter
     private lateinit var filteredHabitsAdapter: HabitAdapter
-    private var isFiltered: Boolean = false
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentHabitsListBinding.inflate(inflater, container, false)
-        return binding.root
+    private var isFiltered: Boolean = false
+    override fun initializeViewBinding(
+        inflater: LayoutInflater,
+        container: ViewGroup?
+    ): FragmentHabitsListBinding {
+        return FragmentHabitsListBinding.inflate(inflater, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -41,32 +42,50 @@ class HabitsListFragment : Fragment() {
         observeState()
     }
 
+    private fun handleFilteredHabits(filteredHabits: List<Habit>) {
+        toggleHabitVisibility(filteredHabits.isNotEmpty())
+        if (filteredHabits.isEmpty() && isFiltered) {
+            showToastMessage("No habits found for the selected date")
+        } else {
+            filteredHabitsAdapter.updateData(filteredHabits)
+            isFiltered = false
+        }
+    }
+
     private fun observeState() {
         collectFlow(viewModel.checkedHabits) { checkedHabitsAdapter.updateData(it) }
         collectFlow(viewModel.uncheckedHabits) { uncheckedHabitsAdapter.updateData(it) }
-        collectFlow(viewModel.filteredHabits) { habits ->
-            toggleHabitVisibility(habits.isNotEmpty())
-            if (habits.isEmpty() && isFiltered) {
-                Toast.makeText(
-                    requireContext(),
-                    "No habits found for the selected date",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-            } else {
-                filteredHabitsAdapter.updateData(habits)
-                isFiltered = false
-            }
-        }
+        collectFlow(viewModel.filteredHabits) { handleFilteredHabits(it) }
     }
 
     private fun createHabitAdapter(isFilteredAdapter: Boolean = false) =
         HabitAdapter(
             emptyList(),
             isFilteredAdapter = isFilteredAdapter,
-            onHabitChecked = { habit -> showEditHabitDialog(habit) },
-            onHabitClicked = { habit -> viewModel.completeHabit(habit) }
+            onEditClicked = { habit ->
+                navigateToHabitDetails(habit)
+            },
+            onDeleteClicked = {
+                handleHabitDeletion(it)
+            },
+            onHabitChecked = { habit -> viewModel.completeHabit(habit) }
         )
+
+    private fun handleHabitDeletion(deletedHabit: Habit) {
+        viewModel.deleteHabit(deletedHabit)
+        Snackbar.make(binding.root, "Habit deleted", Snackbar.LENGTH_LONG)
+            .setAction("Undo") {
+                viewModel.upsertHabit(deletedHabit)
+            }.show()
+    }
+
+    private fun navigateToHabitDetails(habit: Habit) {
+        val action =
+            HabitsListFragmentDirections.actionHabitsListFragmentToHabitDetailFragment(
+                habit.id
+            )
+        findNavController().navigate(action)
+    }
 
     private fun setupRecyclerView(recyclerView: RecyclerView, adapter: HabitAdapter) {
         recyclerView.apply {
@@ -112,16 +131,5 @@ class HabitsListFragment : Fragment() {
             viewModel.getHabitsByDate(selectedDate)
             isFiltered = true
         }
-    }
-
-    private fun showEditHabitDialog(habit: Habit) {
-        EditHabitDialogFragment(habit) { updatedHabit ->
-            viewModel.upsertHabit(updatedHabit)
-        }.show(childFragmentManager, "EditHabitDialog")
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

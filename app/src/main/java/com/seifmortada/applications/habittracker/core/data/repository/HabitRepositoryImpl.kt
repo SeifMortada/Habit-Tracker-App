@@ -23,4 +23,16 @@ class HabitRepositoryImpl @Inject constructor(private val habitDao: HabitDao) : 
     override suspend fun updateCompletion(habitId: Int, completed: List<Long>) {
         habitDao.updateCompletion(habitId, completed)
     }
+
+    override suspend fun getHabitById(id: Int): Habit {
+        return habitDao.getHabitById(id).toHabit()
+    }
+
+    override suspend fun updateHabit(habitId: Int, title: String, details: String) {
+        habitDao.updateHabit(habitId, title, details)
+    }
+
+    override suspend fun deleteHabit(habit: Habit) {
+        habitDao.deleteHabit(habit.toHabitEntity())
+    }
 }
