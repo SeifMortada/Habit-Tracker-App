@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class HabitRepositoryImpl @Inject constructor(private val habitDao: HabitDao) : HabitRepository {
-    override suspend fun insertHabit(habit: Habit) {
+    override suspend fun upsertHabit(habit: Habit) {
         habitDao.insertHabit(habit.toHabitEntity())
     }
 
