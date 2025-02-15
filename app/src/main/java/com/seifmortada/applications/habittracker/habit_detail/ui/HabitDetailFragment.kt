@@ -29,7 +29,7 @@ class HabitDetailFragment : BaseFragment<FragmentHabitDetailBinding, HabitDetail
     private fun fieldsAreCorrect(): Boolean {
         val title = binding.editHabitTitle.text?.trim().toString()
         val description = binding.editHabitDescription.text?.trim().toString()
-        return if (title.isEmpty() || description.isEmpty()) false else true
+        return !(title.isEmpty() || description.isEmpty())
     }
 
     private fun onSaveClicked() {
